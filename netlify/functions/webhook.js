@@ -1,15 +1,24 @@
 exports.handler = async (event, context) => {
     try {
-        // Parse incoming JSON payload
-        const body = JSON.parse(event.body);
+        // Log incoming request for debugging
+        console.log('Incoming event:', event);
 
-        // Log the webhook payload for debugging
-        console.log('Webhook received! Payload:', body);
-
-        // Example: Process the webhook payload
-        if (body.sys?.type === 'Entry') {
-            console.log(`Entry ID: ${body.sys.id}, Type: ${body.sys.type}`);
+        // Check if the payload exists
+        if (!event.body) {
+            throw new Error('No payload received');
         }
+
+        // Parse the incoming payload
+        const body = JSON.parse(event.body);
+        console.log('Parsed payload:', body);
+
+        // Validate payload structure (ensure required fields exist)
+        if (!body.sys || !body.sys.type) {
+            throw new Error('Invalid payload structure');
+        }
+
+        // Process the webhook payload
+        console.log(`Entry ID: ${body.sys.id}, Type: ${body.sys.type}`);
 
         // Respond with success
         return {
@@ -19,7 +28,7 @@ exports.handler = async (event, context) => {
     } catch (error) {
         console.error('Error processing webhook:', error);
 
-        // Respond with an error
+        // Respond with error
         return {
             statusCode: 500,
             body: JSON.stringify({ error: 'Webhook processing failed!' }),
